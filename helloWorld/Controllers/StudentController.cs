@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -14,19 +15,32 @@ namespace helloWorld.Controllers
 
         public ActionResult Index()
         {
-            Student s1 = new Student()
+            string connString = @"Server=LAPTOP-RJ4VKTT3\SQLEXPRESS01;Database=UMS;Integrated Security=true";
+            SqlConnection conn = new SqlConnection(connString);
+            string query = "select * from Students";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            conn.Open();
+            SqlDataReader reader = cmd.ExecuteReader();
+            List<Student> students = new List<Student>();
+            while (reader.Read())
             {
-                Name = "Fahim Ahmed",
-                Id = "2020",
-                Dob = "120312"
-            };
+                Student s = new Student()
+                {
+                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                    Name = reader.GetString(reader.GetOrdinal("Name")),
+                    Dob = reader.GetString(reader.GetOrdinal("Dob")),
+                    Gender = reader.GetString(reader.GetOrdinal("Gender")),
+                    Cgpa = (float)reader.GetDouble(reader.GetOrdinal("Cgpa"))
+                };
+                students.Add(s);
+                
+            }
 
-            
-
-            return View(s1);
+            conn.Close();
+            return View(students);
         }
 
-        public ActionResult List()
+       /* public ActionResult List()
         {
             List<Student> students = new List<Student>();
             for(int i=0; i<10; i++)
@@ -40,34 +54,29 @@ namespace helloWorld.Controllers
                 students.Add(s1);
             }
             return View(students);
-        }
+        }*/
 
+        [HttpGet]
         public ActionResult Create()
         {
             return View();
         }
 
-        public ActionResult CreateSubmit(Student s)
+
+        [HttpPost]
+        public ActionResult Create(Student s) 
         {
+            string connString = @"Server=LAPTOP-RJ4VKTT3\SQLEXPRESS01;Database=UMS;Integrated Security=true";
+            SqlConnection conn = new SqlConnection(connString);
+            string query = string.Format("Insert into Students values ('{0}','{1}','{2}',0.0)", s.Name, s.Dob, s.Gender);
+            SqlCommand cmd = new SqlCommand(query,conn);
+            conn.Open();
+            int r = cmd.ExecuteNonQuery();
+            conn.Close();
 
-           // Student s = new Student();
-
-            //form HttpRequestBase Request
-           /* s.Name = Request["Name"];
-            s.Id = Request["Id"];
-            s.Dob = Request["Dob"];*/
-
-            //form formCollection object
-            /* s.Name = form["Name"];
-             s.Id = form["Id"];
-             s.Dob = form["Dob"];*/
-
-            //form direct variable
-            /* s.Name = Name;
-             s.Id = Id;  
-             s.Dob = Dob;*/
-            return View(s);
+            return RedirectToAction("Index");
         }
+   
 
     }
 }
