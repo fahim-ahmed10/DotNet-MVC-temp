@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace helloWorld.Models
+namespace helloWorld.Models.Entity
 {
-    public class Student
+    public class Course
     {
         public int Id { get; set; }
+        public string Code { get; set; }
         public string Name { get; set; }
-        public string Dob { get; set; }
-
-        public string Gender { get; set; }
-
-        public float? Cgpa { get; set; }
-
     }
 }
